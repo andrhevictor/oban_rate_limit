@@ -2,13 +2,26 @@
 
 It seems like the rate limit does not work well when one of the workers in the queue doesn't have the `arg` being used in the `rate_limit` config.
 
-In this repo we have two workers in the same `default` queue: `Worker1` and `Worker2`.
+In this repo we have two workers in the same `default` queue: `Worker1` and `Worker2`.  
 The queue has rate_limit configured to use the arg `some_arg_key`.
+
+```elixir
+queues: [
+  default: [
+    rate_limit: [
+      allowed: 5,
+      period: 10,
+      partition: [fields: [:args], keys: [:some_arg_key]]
+    ]
+  ]
+]
+```
+
 `Worker1` is a Cron based worker and doesn't have any args. It creates 10 `Worker2` jobs with the `some_arg_key` arg setted.
 
 ## Expected behavior
 
-The job that does not have the key should not be rate limited, but the job that has the key should still follow the rate limit defined.
+The job that does not have the key should not be rate limited, but the job that has the key should still follow the rate limit defined.  
 In this case, `Worker1` should run whenever there is a job, but `Worker2` should still follow the rate limit as it has the `some_arg_key` key in the args.
 
 ## Repro
@@ -20,7 +33,7 @@ In this case, `Worker1` should run whenever there is a job, but `Worker2` should
 
 ## Workaround
 
-It can be fixed by providing the `some_arg_key` to `Worker1`.
+It can be fixed by providing the `some_arg_key` (with any value) to `Worker1`.
 
 On `config/config.exs` change line 16 to:
 
