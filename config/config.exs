@@ -13,13 +13,12 @@ config :oban_rate_limit, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"* * * * *", Worker1}
+       {"* * * * *", Worker1, args: %{some_arg_key: nil}}
      ]}
   ],
   engine: Oban.Pro.Queue.SmartEngine,
   queues: [
     default: [
-      local_limit: 100,
       rate_limit: [
         allowed: 5,
         period: 10,
